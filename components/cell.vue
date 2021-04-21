@@ -2,19 +2,22 @@
   <div
     class="w-20 h-20 flex items-center justify-center bg-gray-50"
     :class="{
-      'bg-opacity-70': isBlack,
-      'bg-opacity-10': !isBlack,
-      'rounded-tl': tl,
-      'rounded-tr': tr,
-      'rounded-bl': bl,
-      'rounded-br': br,
-      'cursor-move': piece !== '',
+      'bg-opacity-70': black,
+      'bg-opacity-10': !black,
+      'rounded-tl': cornerTl,
+      'rounded-tr': cornerTr,
+      'rounded-bl': cornerBl,
+      'rounded-br': cornerBr,
+      'cursor-pointer': piece !== '',
+      'ring-inset ring-8 ring-white': selected,
     }"
+    @click="$emit('click', rank, file)"
   >
     <img
       v-if="piece !== ''"
+      class="m-2 pointer-events-none select-none"
       :src="require(`~/assets/pieces/riohacha/${piece}.svg`)"
-      class="w-3/4"
+      :alt="piece"
     />
   </div>
 </template>
@@ -22,13 +25,21 @@
 <script>
 export default {
   props: {
-    index: { type: Number, required: true },
+    rank: { type: Number, required: true },
+    file: { type: Number, required: true },
     piece: { type: String, required: true },
-    isBlack: { type: Boolean, required: true },
-    tl: { type: Boolean, required: true },
-    tr: { type: Boolean, required: true },
-    bl: { type: Boolean, required: true },
-    br: { type: Boolean, required: true },
+    cornerTl: Boolean,
+    cornerTr: Boolean,
+    cornerBl: Boolean,
+    cornerBr: Boolean,
+    black: Boolean,
+    selected: Boolean,
+  },
+  methods: {
+    bg() {
+      const img = require(`~/assets/pieces/riohacha/${this.piece}.svg`)
+      return `background-image: url(${img});`
+    },
   },
 }
 </script>
