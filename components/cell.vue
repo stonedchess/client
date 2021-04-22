@@ -1,9 +1,9 @@
 <template>
   <div
-    class="w-20 h-20 flex items-center justify-center bg-gray-50"
+    class="w-20 h-20 flex items-center justify-center bg-opacity-75"
     :class="{
-      'bg-opacity-70': black,
-      'bg-opacity-10': !black,
+      'bg-gray-50': black,
+      'bg-gray-500': !black,
       'rounded-tl': cornerTl,
       'rounded-tr': cornerTr,
       'rounded-bl': cornerBl,
