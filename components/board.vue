@@ -1,6 +1,7 @@
 <template>
   <div class="relative">
     <div
+      v-if="id !== undefined"
       class="grid rounded backdrop-filter backdrop-invert shadow-xl"
       :class="`grid-cols-${columns} grid-rows-${rows}`"
     >
@@ -15,6 +16,7 @@
         @click="onCellClick"
       />
     </div>
+    <div v-text="winner"></div>
   </div>
 </template>
 
@@ -41,23 +43,50 @@ export default {
         return { piece, file, rank, black, selected: false }
       }),
     selected: undefined,
+    id: undefined,
+    winner: 2,
+    moves: [],
   }),
+  async fetch() {
+    const res = await fetch('http://127.0.0.1:5000/init')
+    const { id } = await res.json()
+    this.id = id
+  },
   methods: {
-    onCellClick(rank, file) {
+    async onCellClick(rank, file) {
+      if (this.winner !== 2) return
       const cell = this.cells[rank * 8 + file]
 
       if (this.selected === undefined || this.selected.piece === '') {
         if (cell.piece !== '') {
           this.selected = cell
           this.selected.selected = true
+
+          const uri = `http://127.0.0.1:5000/${this.id}/moves/${file}/${rank}`
+          this.moves = await fetch(uri)
+            .then((res) => res.json())
+            .then(({ moves }) => Object.values(moves))
         }
       } else {
-        if (rank !== this.selected.rank || file !== this.selected.file) {
-          cell.piece = this.selected.piece
-          this.selected.piece = ''
+        const moves = this.moves.filter(
+          ({ destination: d }) => d.file === file && d.rank === rank
+        )
+
+        if (moves.length > 0) {
+          const { origin } = moves[0]
+          const uri = `http://127.0.0.1:5000/${this.id}/move/${origin.file}/${origin.rank}/${file}/${rank}`
+          await fetch(uri)
+            .then((res) => res.json())
+            .then(({ winner }) => (this.winner = winner))
+            .then(() => {
+              cell.piece = this.selected.piece
+              this.selected.piece = ''
+            })
         }
+
         this.selected.selected = false
         this.selected = undefined
+        this.moves = []
       }
     },
   },
