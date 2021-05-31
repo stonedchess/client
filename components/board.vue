@@ -16,7 +16,6 @@
         @click="onCellClick"
       />
     </div>
-    <div v-text="winner"></div>
   </div>
 </template>
 
@@ -45,6 +44,7 @@ export default {
     selected: undefined,
     id: undefined,
     winner: 2,
+    player: 1,
     moves: [],
   }),
   async fetch() {
@@ -59,13 +59,13 @@ export default {
 
       if (this.selected === undefined || this.selected.piece === '') {
         if (cell.piece !== '') {
-          this.selected = cell
-          this.selected.selected = true
-
           const uri = `http://127.0.0.1:5000/${this.id}/moves/${file}/${rank}`
-          this.moves = await fetch(uri)
-            .then((res) => res.json())
-            .then(({ moves }) => Object.values(moves))
+          const { moves, player } = await fetch(uri).then((res) => res.json())
+          if (player === this.player) {
+            this.moves = moves
+            this.selected = cell
+            this.selected.selected = true
+          }
         }
       } else {
         const moves = this.moves.filter(
@@ -80,6 +80,7 @@ export default {
             .then(({ winner }) => (this.winner = winner))
             .then(() => {
               cell.piece = this.selected.piece
+              this.player = 1 - this.player
               this.selected.piece = ''
             })
         }
